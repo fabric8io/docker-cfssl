@@ -1,0 +1,61 @@
+#!/bin/bash
+
+set -eo pipefail
+
+if [ -z "${CFSSL_CA_HOST}" ]; then
+  >&2 echo "CFSSL_CA_HOST is not set"
+  exit 1
+fi
+
+if [ ! -f "/etc/cfssl/ca.pem" ];then
+  cat <<EOF > /etc/cfssl/ca.json
+{
+  "hosts": [
+    "${CFSSL_CA_HOST}"
+  ],
+  "key": {
+    "algo": "${CFSSL_CA_ALGO}",
+    "size": ${CFSSL_CA_KEY_SIZE}
+  },
+  "names": [{
+    "O": "${CFSSL_CA_ORGANIZATION}",
+    "OU": "${CFSSL_CA_ORGANIZATIONAL_UNIT}"
+  }]
+}
+EOF
+
+  cfssl genkey -initca ca.json | cfssljson -bare ca
+fi
+
+if [ -n "${CFSSL_CA_AUTH_KEY}"]; then
+  CFSSL_CA_AUTH_KEY=`openssl rand -hex 16`
+  echo "Generated auth key: ${CFSSL_CA_AUTH_KEY}"
+fi
+
+if [ ! -f ${CFSSL_CA_POLICY_FILE} ]; then
+  cat <<EOF > ${CFSSL_CA_POLICY_FILE}
+{
+  "signing": {
+    "default": {
+      "auth_key": "auth_key",
+      "expiry": "8760h",
+      "usages": [
+         "signing",
+         "key encipherment",
+         "server auth"
+       ]
+     }
+  },
+  "auth_keys": {
+    "auth_key": {
+      "key": "${CFSSL_CA_AUTH_KEY}",
+      "type": "standard"
+    }
+  }
+}
+EOF
+fi
+
+exec cfssl serve -address=${CFSSL_ADDRESS} -port=${CFSSL_PORT} -config=${CFSSL_CA_POLICY_FILE}
+
+# vim: set ft=sh:
