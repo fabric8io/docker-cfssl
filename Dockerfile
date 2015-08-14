@@ -24,19 +24,24 @@ RUN set -ex \
     && mkbundle -f /etc/cfssl/ca-bundle.crt /etc/cfssl/trusted_roots/ \
     && apk del --purge build-deps make git go \
     && rm -rf /go /var/cache/apk/* \
-    && apk-install bash openssl
+    && apk-install bash openssl \
+    && chmod 777 $(find /etc/cfssl -type d) \
+    && chmod 666 $(find /etc/cfssl -type f)
 
 ENV CFSSL_CA_HOST=example.localnet \
     CFSSL_CA_ALGO=ecdsa \
-    CFSSL_CA_KEY_SIZE=384 \
+    CFSSL_CA_KEY_SIZE=521 \
     CFSSL_ADDRESS=127.0.0.1 \
     CFSSL_PORT=8888 \
     CFSSL_CA_ORGANIZATION="Internet Widgets, LLC" \
     CFSSL_CA_ORGANIZATIONAL_UNIT="Certificate Authority" \
     CFSSL_CA_POLICY_FILE=/etc/cfssl/ca_policy.json
 
+VOLUME /etc/cfssl
 WORKDIR /etc/cfssl
 
-ENTRYPOINT [ "/start-cfssl" ]
+CMD [ "/start-cfssl" ]
 
 COPY start-cfssl /start-cfssl
+
+USER nobody
