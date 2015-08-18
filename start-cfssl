@@ -60,7 +60,7 @@ if [ ! -f "server.pem" ];then
   cfssl gencert -ca ca.pem -ca-key ca-key.pem ca.json | cfssljson -bare server
 fi
 
-cfssl serve -address=localhost -port=${CFSSL_PORT} -config=${CFSSL_CA_POLICY_FILE} -ca-bundle=/etc/cfssl/ca-bundle.crt -int-bundle=/etc/cfssl/int-bundle.crt -int-dir=/etc/cfssl/data/intermediates &
+cfssl serve -address=localhost -port=8888 -config=${CFSSL_CA_POLICY_FILE} -ca-bundle=/etc/cfssl/ca-bundle.crt -int-bundle=/etc/cfssl/int-bundle.crt -int-dir=/etc/cfssl/data/intermediates &
 
 exec nginx -c /etc/nginx/nginx.conf
 

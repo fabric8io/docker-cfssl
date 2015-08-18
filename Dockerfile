@@ -33,8 +33,6 @@ RUN apk-install bash openssl nginx \
 ENV CFSSL_CA_HOST=example.localnet \
     CFSSL_CA_ALGO=ecdsa \
     CFSSL_CA_KEY_SIZE=521 \
-    CFSSL_ADDRESS=127.0.0.1 \
-    CFSSL_PORT=8888 \
     CFSSL_CA_ORGANIZATION="Internet Widgets, LLC" \
     CFSSL_CA_ORGANIZATIONAL_UNIT="Certificate Authority" \
     CFSSL_CA_POLICY_FILE=/etc/cfssl/data/ca_policy.json
