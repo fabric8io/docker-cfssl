@@ -7,8 +7,8 @@ if [ -z "${CFSSL_CA_HOST}" ]; then
   exit 1
 fi
 
-if [ ! -f "/etc/cfssl/ca.pem" ];then
-  cat <<EOF > /etc/cfssl/ca.json
+if [ ! -f "ca.pem" ];then
+  cat <<EOF > ca.json
 {
   "hosts": [
     "${CFSSL_CA_HOST}"
@@ -57,10 +57,10 @@ EOF
 fi
 
 if [ ! -f "/etc/cfssl/server.pem" ];then
-  cfssl gencert -ca ca.pem -ca-key ca-key.pem /etc/cfssl/ca.json | cfssljson -bare server
+  cfssl gencert -ca ca.pem -ca-key ca-key.pem ca.json | cfssljson -bare server
 fi
 
-cfssl serve -address=localhost -port=${CFSSL_PORT} -config=${CFSSL_CA_POLICY_FILE} &
+cfssl serve -address=localhost -port=${CFSSL_PORT} -config=${CFSSL_CA_POLICY_FILE} -ca-bundle=/etc/cfssl/ca-bundle.crt -int-bundle=/etc/cfssl/int-bundle.crt &
 
 exec nginx -c /etc/nginx/nginx.conf
 

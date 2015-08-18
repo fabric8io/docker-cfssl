@@ -26,6 +26,7 @@ RUN set -ex \
     && rm -rf /go /var/cache/apk/*
 
 RUN apk-install bash openssl nginx \
+    && mkdir /etc/cfssl/data \
     && chmod 777 $(find /etc/cfssl -type d) /var/log/nginx/ /var/lib/nginx/ /var/lib/nginx/tmp/ /var/run/nginx/ \
     && chmod 666 $(find /etc/cfssl -type f)
 
@@ -36,10 +37,10 @@ ENV CFSSL_CA_HOST=example.localnet \
     CFSSL_PORT=8888 \
     CFSSL_CA_ORGANIZATION="Internet Widgets, LLC" \
     CFSSL_CA_ORGANIZATIONAL_UNIT="Certificate Authority" \
-    CFSSL_CA_POLICY_FILE=/etc/cfssl/ca_policy.json
+    CFSSL_CA_POLICY_FILE=/etc/cfssl/data/ca_policy.json
 
-VOLUME /etc/cfssl
-WORKDIR /etc/cfssl
+VOLUME /etc/cfssl/data
+WORKDIR /etc/cfssl/data
 
 CMD [ "/start-cfssl" ]
 
