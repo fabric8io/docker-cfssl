@@ -56,6 +56,12 @@ if [ ! -f ${CFSSL_CA_POLICY_FILE} ]; then
 EOF
 fi
 
-exec cfssl serve -address=${CFSSL_ADDRESS} -port=${CFSSL_PORT} -config=${CFSSL_CA_POLICY_FILE}
+if [ ! -f "/etc/cfssl/server.pem" ];then
+  cfssl gencert -ca ca.pem -ca-key ca-key.pem /etc/cfssl/ca.json | cfssljson -bare server
+fi
+
+cfssl serve -address=localhost -port=${CFSSL_PORT} -config=${CFSSL_CA_POLICY_FILE} &
+
+exec nginx -c /etc/nginx/nginx.conf
 
 # vim: set ft=sh:

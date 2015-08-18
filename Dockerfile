@@ -23,9 +23,10 @@ RUN set -ex \
     && mkbundle -f /etc/cfssl/int-bundle.crt /etc/cfssl/intermediate_ca/ \
     && mkbundle -f /etc/cfssl/ca-bundle.crt /etc/cfssl/trusted_roots/ \
     && apk del --purge build-deps make git go \
-    && rm -rf /go /var/cache/apk/* \
-    && apk-install bash openssl \
-    && chmod 777 $(find /etc/cfssl -type d) \
+    && rm -rf /go /var/cache/apk/*
+
+RUN apk-install bash openssl nginx \
+    && chmod 777 $(find /etc/cfssl -type d) /var/log/nginx/ /var/lib/nginx/ /var/lib/nginx/tmp/ /var/run/nginx/ \
     && chmod 666 $(find /etc/cfssl -type f)
 
 ENV CFSSL_CA_HOST=example.localnet \
@@ -43,5 +44,6 @@ WORKDIR /etc/cfssl
 CMD [ "/start-cfssl" ]
 
 COPY start-cfssl /start-cfssl
+COPY nginx.conf /etc/nginx/nginx.conf
 
 USER nobody
