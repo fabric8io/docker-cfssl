@@ -57,7 +57,23 @@ EOF
 fi
 
 if [ ! -f "server.pem" ];then
-  cfssl gencert -ca ca.pem -ca-key ca-key.pem -hostname "${CFSSL_CA_HOST}" ca.json | cfssljson -bare server
+  cat <<EOF > server.json
+{
+  "hosts": [
+    $(echo "\"${CFSSL_CA_HOST//,/\",\"}\""),"localhost","127.0.0.1"
+  ],
+  "key": {
+    "algo": "${CFSSL_CA_ALGO}",
+    "size": ${CFSSL_CA_KEY_SIZE}
+  },
+  "names": [{
+    "O": "${CFSSL_CA_ORGANIZATION}",
+    "OU": "${CFSSL_CA_ORGANIZATIONAL_UNIT}"
+  }],
+  "CN": "${CFSSL_CA_HOST%%,*}"
+}
+EOF
+  cfssl gencert -ca ca.pem -ca-key ca-key.pem -hostname "${CFSSL_CA_HOST}" server.json | cfssljson -bare server
   cat server.pem ca.pem > server-bundle.pem
 fi
 
